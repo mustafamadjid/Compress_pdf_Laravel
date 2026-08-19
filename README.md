@@ -1,20 +1,20 @@
 # PDF Compressor
 
-Web sederhana untuk mengecilkan ukuran file PDF. Aplikasi memakai Laravel, Livewire, dan Ghostscript.
+A simple web application for reducing PDF file sizes. The application is built with **Laravel**, **Livewire**, and **Ghostscript**.
 
-Panduan ini ditulis untuk pengguna yang belum terbiasa dengan Laravel.
+This guide is intended for users who are not yet familiar with Laravel.
 
-## 1. Siapkan Program
+## 1. Install Required Software
 
-Install program berikut di komputer/server:
+Install the following software on your computer or server:
 
-- PHP 8.2 atau lebih baru
-- Composer 2
-- Node.js versi LTS dan npm
-- Git
-- Ghostscript
+* PHP 8.2 or later
+* Composer 2
+* Node.js LTS and npm
+* Git
+* Ghostscript
 
-Setelah instalasi, buka **PowerShell** di Windows atau **Terminal** di Linux/macOS. Pastikan program terbaca:
+After installation, open **PowerShell** on Windows or a **Terminal** on Linux/macOS and verify that the programs are available:
 
 ```bash
 php --version
@@ -24,44 +24,44 @@ npm --version
 git --version
 ```
 
-Cek Ghostscript:
+Check Ghostscript:
 
 ```bash
 gs --version
 ```
 
-Jika Windows tidak mengenali `gs`, cari lokasi Ghostscript. Nama executable biasanya `gswin64c.exe`.
+If Windows does not recognize `gs`, locate the Ghostscript installation directory. The executable is usually named `gswin64c.exe`.
 
-## 2. Clone dari GitHub
+## 2. Clone the Repository
 
-Ganti URL contoh berikut dengan URL repository GitHub proyek:
+Replace the example URL below with the actual GitHub repository URL:
 
 ```bash
 git clone https://github.com/USERNAME/REPOSITORY.git
 cd REPOSITORY
 ```
 
-Contoh jika repository bernama `pdf-compressor`:
+For example, if the repository is named `pdf-compressor`:
 
 ```bash
 git clone https://github.com/USERNAME/pdf-compressor.git
 cd pdf-compressor
 ```
 
-Semua perintah berikut harus dijalankan dari folder proyek, yaitu folder yang berisi file `artisan`.
+All commands below must be executed from the project directory, which is the folder containing the `artisan` file.
 
-## 3. Install Dependency
+## 3. Install Dependencies
 
-Jalankan:
+Run:
 
 ```bash
 composer install
 npm install
 ```
 
-Composer meng-install dependency PHP. npm meng-install dependency frontend.
+Composer installs the PHP dependencies, while npm installs the frontend dependencies.
 
-## 4. Buat File Environment
+## 4. Create the Environment File
 
 ### Windows PowerShell
 
@@ -77,25 +77,29 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Perintah `key:generate` membuat kunci enkripsi aplikasi. Jangan membagikan isi file `.env`.
+The `key:generate` command creates the application encryption key.
 
-## 5. Atur Ghostscript
+Do not share the contents of your `.env` file.
 
-Buka file `.env`, lalu pastikan nilai berikut sesuai sistem:
+## 5. Configure Ghostscript
+
+Open the `.env` file and make sure the following value matches your system:
 
 ```dotenv
 GHOSTSCRIPT_BINARY=gs
 ```
 
-Untuk Windows, jika `gs` tidak masuk PATH, gunakan lokasi executable. Contoh:
+On Windows, if Ghostscript is not available in the system `PATH`, use the full path to the executable.
+
+Example:
 
 ```dotenv
 GHOSTSCRIPT_BINARY="C:\\Program Files\\gs\\gs10.05.1\\bin\\gswin64c.exe"
 ```
 
-Sesuaikan versi dan lokasi dengan instalasi Ghostscript di komputer.
+Adjust the version number and installation path according to your Ghostscript installation.
 
-Pengaturan PDF lain yang tersedia:
+Other available PDF compressor settings:
 
 ```dotenv
 PDF_COMPRESSOR_MAX_UPLOAD_MB=25
@@ -103,101 +107,139 @@ PDF_COMPRESSOR_RETENTION_MINUTES=60
 PDF_COMPRESSOR_PROCESS_TIMEOUT=120
 ```
 
-Artinya:
+These values mean:
 
-- Ukuran upload maksimum: 25 MB.
-- File sementara dihapus setelah 60 menit.
-- Proses Ghostscript dihentikan setelah 120 detik.
+* Maximum upload size: 25 MB
+* Temporary files are retained for 60 minutes
+* Ghostscript processes are terminated after 120 seconds
 
-## 6. Build Frontend
+## 6. Build the Frontend
+
+Run:
 
 ```bash
 npm run build
 ```
 
-Build harus selesai tanpa error. Perintah ini membuat asset production di `public/build`.
+The build process should complete without errors.
 
-## 7. Jalankan Aplikasi
+This command generates production assets inside:
+
+```text
+public/build
+```
+
+## 7. Run the Application
+
+Start the Laravel development server:
 
 ```bash
 php artisan serve
 ```
 
-Buka browser dan kunjungi:
+Open your browser and visit:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Upload satu file PDF, pilih level kompresi, lalu klik **Compress PDF**.
+Upload a PDF file, select a compression level, and click **Compress PDF**.
 
-Untuk menghentikan server, tekan `Ctrl+C` di terminal.
+To stop the development server, press:
 
-## 8. Jalankan Test
+```text
+Ctrl+C
+```
+
+in the terminal.
+
+## 8. Run Tests
+
+Run the automated test suite:
 
 ```bash
 php artisan test
 ```
 
-Perintah tambahan untuk memeriksa format kode dan build frontend:
+You can also verify code formatting and the frontend build:
 
 ```bash
 ./vendor/bin/pint --test
 npm run build
 ```
 
-Pada Windows PowerShell, jalankan Pint dengan:
+On Windows PowerShell, run Pint using:
 
 ```powershell
 .\vendor\bin\pint --test
 ```
 
-Test otomatis tidak membutuhkan Ghostscript karena proses eksternal di-fake pada test service. Ghostscript tetap wajib untuk memakai aplikasi secara nyata.
+The automated tests do not require Ghostscript because external processes are faked during service tests.
 
-## 9. Cleanup File Sementara
+Ghostscript is still required when running the application normally.
 
-File upload dan hasil kompresi disimpan sementara di:
+## 9. Temporary File Cleanup
+
+Uploaded files and compressed results are temporarily stored in:
 
 ```text
 storage/app/temporary/uploads
 storage/app/temporary/compressed
 ```
 
-Hapus file yang sudah kedaluwarsa secara manual:
+To manually remove expired temporary files, run:
 
 ```bash
 php artisan pdf:cleanup
 ```
 
-Aplikasi menjadwalkan cleanup setiap 30 menit. Agar scheduler berjalan di server Linux, tambahkan cron berikut:
+The application schedules cleanup every 30 minutes.
+
+To make the Laravel scheduler run continuously on a Linux server, add the following cron entry:
 
 ```cron
-* * * * * cd /path/ke/proyek && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Ganti `/path/ke/proyek` dengan lokasi asli folder aplikasi.
+Replace:
 
-## 10. Jika Muncul Error
+```text
+/path/to/project
+```
+
+with the actual path to the application directory.
+
+## 10. Troubleshooting
 
 ### `php is not recognized`
 
-PHP belum ter-install atau folder PHP belum masuk PATH. Install PHP, atau gunakan terminal yang disediakan Laragon/XAMPP sesuai setup komputer.
+PHP is either not installed or its installation directory is not included in the system `PATH`.
+
+Install PHP or use the terminal provided by tools such as Laragon or XAMPP, depending on your local environment.
 
 ### `composer is not recognized`
 
-Install Composer, lalu tutup dan buka kembali terminal.
+Install Composer, then close and reopen your terminal.
 
 ### `npm is not recognized`
 
-Install Node.js versi LTS, lalu buka kembali terminal.
+Install the Node.js LTS version, then reopen your terminal.
 
 ### `gs is not recognized`
 
-Install Ghostscript. Pada Windows, isi `GHOSTSCRIPT_BINARY` dengan path lengkap ke `gswin64c.exe`.
+Install Ghostscript.
+
+On Windows, set `GHOSTSCRIPT_BINARY` to the full path of `gswin64c.exe`.
+
+Example:
+
+```dotenv
+GHOSTSCRIPT_BINARY="C:\\Program Files\\gs\\gs10.05.1\\bin\\gswin64c.exe"
+```
 
 ### `Vite manifest not found`
 
-Jalankan:
+Run:
 
 ```bash
 npm install
@@ -206,37 +248,46 @@ npm run build
 
 ### `The PDF could not be compressed`
 
-Periksa hal berikut:
+Check the following:
 
-- Ghostscript sudah ter-install.
-- `GHOSTSCRIPT_BINARY` benar.
-- File PDF tidak rusak atau dilindungi password.
-- Folder `storage/` bisa ditulis aplikasi.
+* Ghostscript is installed.
+* `GHOSTSCRIPT_BINARY` points to the correct executable.
+* The PDF file is not corrupted.
+* The PDF file is not password-protected.
+* The application has permission to write to the `storage/` directory.
 
-## 11. Deploy ke Server
+## 11. Deploying to a Server
 
-Sebelum aplikasi dipakai publik:
+Before making the application publicly accessible:
 
-- Set `APP_ENV=production`.
-- Set `APP_DEBUG=false`.
-- Set `APP_URL` ke URL asli aplikasi.
-- Install Ghostscript di server.
-- Pastikan `storage/` dan `bootstrap/cache/` writable.
-- Jalankan `npm run build`.
-- Aktifkan scheduler Laravel.
-- Set `upload_max_filesize` dan `post_max_size` PHP lebih besar dari batas upload aplikasi.
-- Set batas body request Nginx `client_max_body_size` atau batas serupa di Apache.
-- Jangan letakkan `storage/app/temporary` di dalam folder public web.
-- Gunakan HTTPS.
+* Set `APP_ENV=production`.
+* Set `APP_DEBUG=false`.
+* Set `APP_URL` to the actual application URL.
+* Install Ghostscript on the server.
+* Make sure `storage/` and `bootstrap/cache/` are writable.
+* Run `npm run build`.
+* Enable the Laravel scheduler.
+* Configure PHP `upload_max_filesize` and `post_max_size` to be larger than the application's upload limit.
+* Configure the Nginx `client_max_body_size` directive or the equivalent Apache request-body limit.
+* Do not place `storage/app/temporary` inside the publicly accessible web directory.
+* Use HTTPS.
 
-Database, login, Redis, queue, dan authentication tidak diperlukan untuk MVP ini.
+The following components are not required for this MVP:
 
-## Keamanan
+* Database
+* User authentication
+* Login system
+* Redis
+* Queue workers
 
-- Upload memeriksa extension, MIME type, dan ukuran file.
-- Nama internal file dibuat memakai UUID.
-- Preset Ghostscript ditentukan aplikasi, bukan input user.
-- Download memakai signed URL yang memiliki masa berlaku.
-- Client tidak pernah mengirim path filesystem.
-- Error teknis masuk log server; UI hanya menampilkan pesan umum.
-- File sementara dibersihkan otomatis.
+## Security
+
+The application includes several basic security measures:
+
+* Uploaded files are validated by extension, MIME type, and file size.
+* Internal filenames are generated using UUIDs.
+* Ghostscript compression presets are defined by the application rather than supplied directly by users.
+* Downloads use signed URLs with an expiration time.
+* The client never sends filesystem paths.
+* Technical error details are written to server logs, while the UI only displays generic error messages.
+* Temporary files are cleaned up automatically.
