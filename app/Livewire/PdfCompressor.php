@@ -74,6 +74,17 @@ class PdfCompressor extends Component
         $this->resetErrorBag('file');
     }
 
+    public function resetCompression(): void
+    {
+        if (($this->result['file_identifier'] ?? null) !== null) {
+            Storage::disk('local')->delete('temporary/compressed/'.$this->result['file_identifier'].'.pdf');
+        }
+
+        $this->resetFile();
+        $this->compressionLevel = CompressionLevel::Medium->value;
+        $this->resetValidation();
+    }
+
     public function compress(PdfCompressionService $compressionService): void
     {
         $this->validate([

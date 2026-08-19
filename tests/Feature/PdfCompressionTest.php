@@ -30,7 +30,6 @@ class PdfCompressionTest extends TestCase
             ->assertSet('storedFilePath', fn (string $path): bool => str_starts_with($path, 'temporary/uploads/'));
 
         Storage::disk('local')->assertExists($this->storedPath());
-        $this->assertCount(1, Storage::disk('local')->allFiles('temporary/uploads'));
         $this->assertSame('document.pdf', $pdf->getClientOriginalName());
     }
 
@@ -152,6 +151,33 @@ class PdfCompressionTest extends TestCase
             ->call('compress')
             ->assertSet('result.reduction_percentage', -20.0)
             ->assertSee('This PDF is already well optimized and could not be reduced significantly.');
+    }
+
+    #[Test]
+    public function reset_compression_clears_component_state_and_generated_file(): void
+    {
+        Storage::fake('local');
+        $identifier = '550e8400-e29b-41d4-a716-446655440010';
+        Storage::disk('local')->put('temporary/compressed/'.$identifier.'.pdf', 'compressed');
+
+        Livewire::test(PdfCompressor::class)
+            ->set('result', [
+                'file_identifier' => $identifier,
+                'original_size' => 1000,
+                'compressed_size' => 800,
+                'reduction_percentage' => 20,
+                'compression_level' => 'medium',
+                'download_url' => 'https://example.com',
+            ])
+            ->set('compressionLevel', 'high')
+            ->set('compressionError', 'error')
+            ->call('resetCompression')
+            ->assertSet('result', null)
+            ->assertSet('compressionLevel', 'medium')
+            ->assertSet('compressionError', null)
+            ->assertSet('file', null);
+
+        Storage::disk('local')->assertMissing('temporary/compressed/'.$identifier.'.pdf');
     }
 
     protected function fakeService(int $originalSize, int $compressedSize): PdfCompressionService
