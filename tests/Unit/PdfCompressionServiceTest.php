@@ -23,6 +23,22 @@ class PdfCompressionServiceTest extends TestCase
     }
 
     #[Test]
+    public function empty_source_file_is_rejected_before_process_execution(): void
+    {
+        $source = $this->temporaryPath('empty-source.pdf');
+        file_put_contents($source, '');
+
+        $this->expectException(PdfCompressionException::class);
+        $this->expectExceptionMessage('The source PDF file is empty.');
+
+        (new PdfCompressionService)->compress(
+            $source,
+            $this->temporaryPath('output.pdf'),
+            CompressionLevel::Medium
+        );
+    }
+
+    #[Test]
     public function missing_output_after_process_is_rejected(): void
     {
         $this->expectException(PdfCompressionException::class);

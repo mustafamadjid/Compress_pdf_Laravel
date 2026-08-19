@@ -72,6 +72,14 @@ class PdfCompressionTest extends TestCase
     }
 
     #[Test]
+    public function compression_cannot_start_without_an_uploaded_file(): void
+    {
+        Livewire::test(PdfCompressor::class)
+            ->call('compress')
+            ->assertHasErrors(['file' => 'required']);
+    }
+
+    #[Test]
     public function compression_level_can_be_changed(): void
     {
         Livewire::test(PdfCompressor::class)
@@ -137,6 +145,35 @@ class PdfCompressionTest extends TestCase
             ->assertSet('isProcessing', false)
             ->assertSet('compressionError', 'The PDF could not be compressed. Please try another file.')
             ->assertDontSee('C:/secret/path/gs');
+    }
+
+    #[Test]
+    public function failed_retry_clears_previous_result_state(): void
+    {
+        Storage::fake('local');
+        $this->app->bind(PdfCompressionService::class, fn () => new class extends PdfCompressionService
+        {
+            public function compress(string $sourcePath, string $destinationPath, CompressionLevel $level): array
+            {
+                throw new \RuntimeException('permission denied: /internal/path');
+            }
+        });
+
+        Livewire::test(PdfCompressor::class)
+            ->set('file', UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'))
+            ->set('result', [
+                'original_filename' => 'old.pdf',
+                'original_size' => 10,
+                'compressed_size' => 5,
+                'reduction_percentage' => 50,
+                'compression_level' => 'medium',
+                'file_identifier' => '550e8400-e29b-41d4-a716-446655440099',
+                'download_url' => 'https://example.com/old',
+            ])
+            ->call('compress')
+            ->assertSet('result', null)
+            ->assertSet('compressionError', 'The PDF could not be compressed. Please try another file.')
+            ->assertDontSee('/internal/path');
     }
 
     #[Test]

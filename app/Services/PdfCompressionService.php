@@ -30,6 +30,10 @@ class PdfCompressionService
             throw new PdfCompressionException('The source PDF file does not exist or is not readable.');
         }
 
+        if (filesize($sourcePath) === 0) {
+            throw new PdfCompressionException('The source PDF file is empty.');
+        }
+
         $destinationDirectory = dirname($destinationPath);
 
         if (! is_dir($destinationDirectory) && ! @mkdir($destinationDirectory, 0755, true) && ! is_dir($destinationDirectory)) {

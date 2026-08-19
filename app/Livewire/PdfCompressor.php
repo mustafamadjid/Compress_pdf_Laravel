@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Enums\CompressionLevel;
-use App\Exceptions\PdfCompressionException;
 use App\Services\PdfCompressionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Throwable;
 
 class PdfCompressor extends Component
 {
@@ -95,6 +95,7 @@ class PdfCompressor extends Component
 
         $this->isProcessing = true;
         $this->compressionError = null;
+        $this->result = null;
 
         try {
             $identifier = (string) Str::uuid();
@@ -121,7 +122,7 @@ class PdfCompressor extends Component
                     ['identifier' => $identifier, 'name' => $this->originalFileName],
                 ),
             ];
-        } catch (PdfCompressionException $exception) {
+        } catch (Throwable $exception) {
             Log::error('PDF compression failed.', [
                 'exception' => $exception->getMessage(),
                 'upload_path' => $this->storedFilePath,
