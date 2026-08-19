@@ -137,4 +137,16 @@ class PdfCompressor extends Component
     {
         return view('livewire.pdf-compressor');
     }
+
+    public function formatBytes(?int $bytes): string
+    {
+        if (! $bytes) {
+            return '0 B';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $power = min((int) floor(log($bytes, 1024)), count($units) - 1);
+
+        return number_format($bytes / (1024 ** $power), $power === 0 ? 0 : 2).' '.$units[$power];
+    }
 }
