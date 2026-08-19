@@ -95,5 +95,27 @@
                 <span wire:loading.remove wire:target="compress">Compress PDF</span>
             </button>
         </div>
+
+        @if ($compressionError)
+            <p class="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">{{ $compressionError }}</p>
+        @endif
+
+        @if ($result)
+            <section class="rounded-2xl border border-emerald-400/25 bg-emerald-400/5 p-5" aria-live="polite">
+                <p class="text-sm font-semibold text-emerald-300">Compression Complete</p>
+                <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+                    <div><dt class="text-slate-500">Original Size</dt><dd class="mt-1 font-medium text-slate-100">{{ number_format($result['original_size'] / 1048576, 2) }} MB</dd></div>
+                    <div><dt class="text-slate-500">Compressed Size</dt><dd class="mt-1 font-medium text-slate-100">{{ number_format($result['compressed_size'] / 1048576, 2) }} MB</dd></div>
+                    <div><dt class="text-slate-500">Reduction</dt><dd class="mt-1 font-medium text-slate-100">{{ number_format($result['reduction_percentage'], 2) }}%</dd></div>
+                    <div><dt class="text-slate-500">Compression Level</dt><dd class="mt-1 font-medium text-slate-100">{{ \App\Enums\CompressionLevel::fromInput($result['compression_level'])->label() }}</dd></div>
+                </dl>
+                @if ($result['compressed_size'] >= $result['original_size'])
+                    <p class="mt-4 text-sm leading-relaxed text-amber-200">This PDF is already well optimized and could not be reduced significantly.</p>
+                @endif
+                <a href="{{ $result['download_url'] }}" class="mt-5 inline-flex items-center justify-center rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-transform duration-150 active:scale-[0.97]">
+                    Download PDF
+                </a>
+            </section>
+        @endif
     </form>
 </div>
